@@ -22,10 +22,10 @@ class LibRawLoader {
 
   LibRawLoader(this.bindings);
 
-  Future<LibRawImage> openImage(String filepath) async {
+  LibRawImage openImage(String filepath) {
     final rawFile = File(filepath);
 
-    if (!await rawFile.exists()) { 
+    if (!rawFile.existsSync()) { 
       throw Exception('File not found: $filepath');
     }
 
@@ -57,7 +57,7 @@ class LibRawLoader {
     );
   }
   
-  Future<Uint8List> unpackThumbnailFromLibRawImage(LibRawImage libRawImage) async {
+  Uint8List unpackThumbnailFromLibRawImage(LibRawImage libRawImage) {
     return unpackThumbnail(libRawImage.filepath);
   }
 

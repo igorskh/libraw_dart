@@ -18,7 +18,7 @@ void main(List<String> arguments) async {
   final image = loader.openImage("assets/DSC03748.ARW");
 
   try {
-    final libRawImage = await image;
+    final libRawImage = image;
     print('Image loaded: ${libRawImage.filepath}');
     print('Make: ${libRawImage.metaData.make}');
     print('Model: ${libRawImage.metaData.model}');
@@ -30,7 +30,7 @@ void main(List<String> arguments) async {
     print('Width: ${libRawImage.metaData.width}');
     print('Height: ${libRawImage.metaData.height}');
 
-    final thumbnail = await loader.unpackThumbnailFromLibRawImage(libRawImage);
+    final thumbnail = loader.unpackThumbnailFromLibRawImage(libRawImage);
     print('Thumbnail unpacked, length: ${thumbnail.length} bytes');
   } catch (e) {
     print('Error: $e');
