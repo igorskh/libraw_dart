@@ -1,0 +1,24 @@
+name: LibRawDartBindings
+description: |
+  Bindings for `libraw/libraw/libraw.h`.
+
+  Regenerate bindings with `dart run ffigen --config ffigen_config.yaml`.
+output: 'lib/libraw_bindings_gen.dart'
+headers:
+  entry-points:
+    - 'libraw/libraw/libraw.h'
+  include-directives:
+    - 'libraw/libraw/libraw.h'
+preamble: |
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+comments:
+  style: any
+  length: full
+type-map:
+  'native-types': # Targets native types.
+    'char':
+      'lib': 'ffi' # predefined import.
+      'c-type': 'Uint8'
+      'dart-type': 'int'
