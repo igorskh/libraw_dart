@@ -61,7 +61,7 @@ class LibRawLoader {
     return unpackThumbnail(libRawImage.filepath);
   }
 
-  Future<Uint8List> unpackThumbnail(String filepath) async {
+  Uint8List unpackThumbnail(String filepath) {
     final rawFile = File(filepath);
     
     Pointer<libraw_data_t> ptr = bindings.libraw_init(0);
