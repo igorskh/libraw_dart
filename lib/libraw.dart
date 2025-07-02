@@ -60,7 +60,7 @@ class LibRawLoader {
     );
   }
 
-  Uint8List unpackThumbnail(LibRawImage libRawImage) {
+  void unpackThumbnail(LibRawImage libRawImage) {
     if (libRawImage.ptr == null) {
       throw Exception('LibRawImage pointer is null. Ensure the image is opened correctly.');
     }
@@ -79,7 +79,7 @@ class LibRawLoader {
       throw Exception('No thumbnail data found');
     }
 
-    return Uint8List.fromList(thumbnailData);
+    libRawImage.thumbnailData = Uint8List.fromList(thumbnailData);
   }
 
   void closeImage(LibRawImage libRawImage) {

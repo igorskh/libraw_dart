@@ -6,17 +6,17 @@ import 'package:libraw_dart/libraw.dart';
 import 'package:libraw_dart/libraw_image.dart';
 import 'package:libraw_dart/utils.dart';
 
-Future<Uint8List> unpackRAWThumbnail(String imagePath) async {
+Future<LibRawImage> loadRAWImage(String imagePath) async {
   final libname = determineLibraryName();
   final libPath = 'bin/$libname';
 
   LibRawLoader? loader = LibRawLoader.fromPath(libPath); // FFI object must be created here
   LibRawImage? rawImage = loader.openImage(imagePath);
-  final thumbnail = loader.unpackThumbnail(rawImage);
+  loader.unpackThumbnail(rawImage);
 
   loader.closeImage(rawImage);
 
-  return thumbnail;
+  return rawImage;
 }
 
 
@@ -32,22 +32,19 @@ void printMemoryUsage() {
 void main(List<String> arguments) async {
   printMemoryUsage();
 
-  Uint8List? data = await Isolate.run(() async {
+  LibRawImage? data = await Isolate.run(() async {
     final imagePath = 'assets/DSC03748.ARW'; 
-    final thumbnailData = await unpackRAWThumbnail(imagePath);
 
-    return thumbnailData;
+    return await loadRAWImage(imagePath);
   });
-  print('Thumbnail length: ${data?.length} bytes');
+  print('Thumbnail length: ${data?.thumbnailData?.length} bytes');
 
   printMemoryUsage();
 
 
   data = await Isolate.run(() async {
     final imagePath = 'assets/DSC03748.ARW'; 
-    final thumbnailData = await unpackRAWThumbnail(imagePath);
-
-    return thumbnailData;
+    return await loadRAWImage(imagePath);
   });
   printMemoryUsage();
 
