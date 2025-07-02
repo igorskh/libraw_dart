@@ -15,8 +15,6 @@ void main() {
 
     final image = loader.openImage("assets/DSC03748.ARW");
 
-    expect(image, completes, reason: 'Image loading should complete successfully');
-
     final libRawImage = image;
     expect(libRawImage.filepath, isNotEmpty, reason: 'Filepath should not be empty');
     expect(libRawImage.metaData.make, isNotEmpty, reason: 'Make should not be empty');
@@ -29,8 +27,11 @@ void main() {
     expect(libRawImage.metaData.width, greaterThan(0), reason: 'Width should be greater than 0');
     expect(libRawImage.metaData.height, greaterThan(0), reason: 'Height should be greater than 0');
 
-    final thumbnail = loader.unpackThumbnailFromLibRawImage(libRawImage);
+    final thumbnail = loader.unpackThumbnail(libRawImage);
     expect(thumbnail.lengthInBytes, greaterThan(0), reason: 'Thumbnail unpacked length should be greater than 0 bytes');
 
+    // Close the image to free resources
+    loader.closeImage(libRawImage);
+    expect(libRawImage.ptr, isNull, reason: 'Pointer should be null after closing the image');
   });
 }
