@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:libraw_dart/libraw.dart';
 import 'package:libraw_dart/libraw_image.dart';
@@ -11,7 +10,7 @@ Future<LibRawImage> loadRAWImage(String imagePath) async {
   final libPath = 'bin/$libname';
 
   LibRawLoader? loader = LibRawLoader.fromPath(libPath); // FFI object must be created here
-  LibRawImage? rawImage = loader.openImage(imagePath);
+  LibRawImage? rawImage = loader.openImageFromPath(imagePath);
   loader.unpackThumbnail(rawImage);
 
   loader.closeImage(rawImage);

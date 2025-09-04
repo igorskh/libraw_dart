@@ -9,11 +9,17 @@ import 'package:libraw_dart/libraw_image.dart';
 import 'package:libraw_dart/libraw_image_meta_data.dart';
 import 'package:libraw_dart/utils.dart';
 
+Pointer<Void> uint8ListToPointerVoid(Uint8List data) {
+  final p = malloc<Uint8>(data.length);
+  p.asTypedList(data.length).setAll(0, data);
+  return p.cast<Void>();
+}
+
 class LibRawLoader {
   final LibRawDartBindings bindings;
 
-  static LibRawLoader fromBindings(LibRawDartBindings bindings) => 
-      LibRawLoader(bindings); 
+  static LibRawLoader fromBindings(LibRawDartBindings bindings) =>
+      LibRawLoader(bindings);
 
   static LibRawLoader fromPath(String path) =>
       LibRawLoader.fromDynamicLibrary(DynamicLibrary.open(path));
@@ -22,26 +28,45 @@ class LibRawLoader {
       LibRawLoader(LibRawDartBindings(dylib));
 
   static LibRawLoader fromAutoDetect() {
-    return LibRawLoader.fromDynamicLibrary(DynamicLibrary.open(determineLibraryName()));
+    return LibRawLoader.fromDynamicLibrary(
+      DynamicLibrary.open(determineLibraryName()),
+    );
   }
 
   LibRawLoader(this.bindings);
 
-  LibRawImage openImage(String filepath) {
-    final rawFile = File(filepath);
-
-    if (!rawFile.existsSync()) { 
-      throw Exception('File not found: $filepath');
-    }
+  Pointer<libraw_data_t> _openFromBytes(Uint8List bytes) {
     Pointer<libraw_data_t> ptr = bindings.libraw_init(0);
-    int result = bindings.libraw_open_file(ptr, rawFile.absolute.path.toNativeUtf8().cast());
-      if (result != 0) {
+    int result = bindings.libraw_open_buffer(
+      ptr,
+      uint8ListToPointerVoid(bytes),
+      bytes.length,
+    );
+    if (result != 0) {
       bindings.libraw_close(ptr);
-      throw Exception('Failed to open raw file: $filepath');
+      throw Exception('Failed to open raw data from bytes');
     }
+    return ptr;
+  }
 
-    LibRawImageMetaData metaData = LibRawImageMetaData(
-      dateTime: DateTime.fromMillisecondsSinceEpoch(ptr.ref.other.timestamp * 1000),
+  Pointer<libraw_data_t> _openFromFile(File rawFile) {
+    Pointer<libraw_data_t> ptr = bindings.libraw_init(0);
+    int result = bindings.libraw_open_file(
+      ptr,
+      rawFile.absolute.path.toNativeUtf8().cast(),
+    );
+    if (result != 0) {
+      bindings.libraw_close(ptr);
+      throw Exception('Failed to open raw file');
+    }
+    return ptr;
+  }
+
+  LibRawImageMetaData _createMetaData(Pointer<libraw_data_t> ptr) {
+    return LibRawImageMetaData(
+      dateTime: DateTime.fromMillisecondsSinceEpoch(
+        ptr.ref.other.timestamp * 1000,
+      ),
       make: arrayToString(ptr.ref.idata.make),
       model: arrayToString(ptr.ref.idata.model),
       lens: arrayToString(ptr.ref.lens.Lens),
@@ -50,8 +75,20 @@ class LibRawLoader {
       iso: ptr.ref.other.iso_speed.ceil(),
       focalLength: ptr.ref.other.focal_len.ceil().toDouble(),
       width: ptr.ref.sizes.width,
-      height: ptr.ref.sizes.height
+      height: ptr.ref.sizes.height,
     );
+  }
+
+  LibRawImage openImageFromPath(String filepath) {
+    final rawFile = File(filepath);
+
+    if (!rawFile.existsSync()) {
+      throw Exception('File not found: $filepath');
+    }
+
+    final ptr = _openFromFile(rawFile);
+
+    LibRawImageMetaData metaData = _createMetaData(ptr);
 
     return LibRawImage(
       filepath: rawFile.absolute.path,
@@ -60,9 +97,23 @@ class LibRawLoader {
     );
   }
 
+  LibRawImage openImageFromBytes(Uint8List bytes) {
+    final ptr = _openFromBytes(bytes);
+
+    LibRawImageMetaData metaData = _createMetaData(ptr);
+
+    return LibRawImage(
+      filepath: 'In-Memory Data',
+      metaData: metaData,
+      ptr: ptr,
+    );
+  }
+
   void unpackThumbnail(LibRawImage libRawImage) {
     if (libRawImage.ptr == null) {
-      throw Exception('LibRawImage pointer is null. Ensure the image is opened correctly.');
+      throw Exception(
+        'LibRawImage pointer is null. Ensure the image is opened correctly.',
+      );
     }
 
     final result = bindings.libraw_unpack_thumb(libRawImage.ptr!);
@@ -72,7 +123,8 @@ class LibRawLoader {
     }
 
     final thumbnailData = pointerToUint8List(
-      libRawImage.ptr!.ref.thumbnail.thumb, libRawImage.ptr!.ref.thumbnail.tlength,
+      libRawImage.ptr!.ref.thumbnail.thumb,
+      libRawImage.ptr!.ref.thumbnail.tlength,
     );
 
     if (thumbnailData.isEmpty) {
