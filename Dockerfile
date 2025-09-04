@@ -1,4 +1,4 @@
-FROM dart:stable AS build
+FROM dart:3.9.2 AS build
 
 RUN apt-get update && apt-get install -y libraw-bin=0.21.4-2
 

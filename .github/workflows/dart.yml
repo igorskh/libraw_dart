@@ -7,13 +7,13 @@ name: Dart
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: dart:3.9.2
 
     steps:
       - uses: actions/checkout@v4
@@ -23,13 +23,13 @@ jobs:
       # https://github.com/dart-lang/setup-dart/blob/main/README.md
       # - uses: dart-lang/setup-dart@v1
       - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-        
+
       - name: Install dependencies
         run: dart pub get
-        
+
       - name: Install libraw dependencies
         run: sudo apt update && sudo apt install -y libraw-bin=0.21.4-2
-        
+
       - name: Copy libraw library
         run: cp /usr/lib/x86_64-linux-gnu/libraw.so.23 /app/bin/libraw.so
 
