@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:libraw_dart/libraw_image_meta_data.dart';
 
@@ -14,6 +15,5 @@ class LibRawImage {
   String filepath;
   LibRawImageMetaData metaData;
   Pointer<libraw_data_t>? ptr;
-
-  
+  Uint8List? thumbnailData;
 }
