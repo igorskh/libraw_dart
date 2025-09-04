@@ -13,10 +13,31 @@ on:
 
 jobs:
   build:
-    runs-on: dart-3.9.2
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake pkg-config
+
+      - name: Build LibRaw from source
+        run: |
+          cd libraw
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+          make -j$(nproc)
+
+      - name: Copy shared library to app folder
+        run: |
+          mkdir -p bin
+          cp libraw/build/libraw.so bin/
 
       # Note: This workflow uses the latest stable version of the Dart SDK.
       # You can specify other versions if desired, see documentation here:
@@ -26,12 +47,6 @@ jobs:
 
       - name: Install dependencies
         run: dart pub get
-
-      - name: Install libraw dependencies
-        run: sudo apt update && sudo apt install -y libraw-bin=0.21.4-2
-
-      - name: Copy libraw library
-        run: cp /usr/lib/x86_64-linux-gnu/libraw.so.23 /app/bin/libraw.so
 
       # Uncomment this step to verify the use of 'dart format' on each commit.
       # - name: Verify formatting
