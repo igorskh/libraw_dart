@@ -9,9 +9,7 @@ Future<LibRawImage> loadRAWImage(String imagePath) async {
   final libname = determineLibraryName();
   final libPath = 'bin/$libname';
 
-  LibRawLoader? loader = LibRawLoader.fromPath(
-    libPath,
-  ); // FFI object must be created here
+  LibRawLoader? loader = LibRawLoader.fromPath(libPath);
   LibRawImage? rawImage = loader.openImageFromPath(imagePath);
   loader.unpackThumbnail(rawImage);
 
@@ -22,10 +20,8 @@ Future<LibRawImage> loadRAWImage(String imagePath) async {
 
 void printMemoryUsage() {
   final info = ProcessInfo.currentRss;
-  // final maxInfo = ProcessInfo.maxRss;
 
   print('Current RSS: ${(info / 1024 / 1024).toStringAsFixed(2)} MB');
-  // print('Max RSS: ${(maxInfo / 1024 / 1024).toStringAsFixed(2)} MB');
 }
 
 void main(List<String> arguments) async {
