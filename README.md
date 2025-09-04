@@ -5,11 +5,24 @@
 Version of [LibRaw](https://github.com/LibRaw/LibRaw/tree/0.21.4) used: 0.21.4
 
 ## Generate bindings
+
+The submodule is linked to the tested version of LibRaw:
+```bash
+git submodule update --init --recursive
+```
+
 ```bash
 dart run ffigen --config .\ffigen_config.yaml
 ```
 
 ## CLI Example
+
+A compiled binary required to run the example script, e.g. libraw.dll for Windows, libraw.so for Linux.
+
+Following script downloads a DLL: 
+```bash
+.\download-libraw.ps1
+```
 
 ```bash
 dart pub get

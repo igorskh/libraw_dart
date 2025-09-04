@@ -3,3 +3,5 @@
 .dart_tool/
 
 test_output
+LibRaw-Extract
+bin/libraw.dll
