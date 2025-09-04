@@ -6,14 +6,10 @@ import 'package:ffi/ffi.dart';
 
 import 'package:libraw_dart/libraw_bindings_gen.dart';
 import 'package:libraw_dart/libraw_image.dart';
-import 'package:libraw_dart/libraw_image_meta_data.dart';
 import 'package:libraw_dart/utils.dart';
 
-Pointer<Void> uint8ListToPointerVoid(Uint8List data) {
-  final p = malloc<Uint8>(data.length);
-  p.asTypedList(data.length).setAll(0, data);
-  return p.cast<Void>();
-}
+import 'libraw_data_type.dart';
+
 
 class LibRawLoader {
   final LibRawDartBindings bindings;
@@ -62,23 +58,6 @@ class LibRawLoader {
     return ptr;
   }
 
-  LibRawImageMetaData _createMetaData(Pointer<libraw_data_t> ptr) {
-    return LibRawImageMetaData(
-      dateTime: DateTime.fromMillisecondsSinceEpoch(
-        ptr.ref.other.timestamp * 1000,
-      ),
-      make: arrayToString(ptr.ref.idata.make),
-      model: arrayToString(ptr.ref.idata.model),
-      lens: arrayToString(ptr.ref.lens.Lens),
-      aperture: ptr.ref.other.aperture,
-      shutter: 1 / ptr.ref.other.shutter,
-      iso: ptr.ref.other.iso_speed.ceil(),
-      focalLength: ptr.ref.other.focal_len.ceil().toDouble(),
-      width: ptr.ref.sizes.width,
-      height: ptr.ref.sizes.height,
-    );
-  }
-
   LibRawImage openImageFromPath(String filepath) {
     final rawFile = File(filepath);
 
@@ -87,12 +66,9 @@ class LibRawLoader {
     }
 
     final ptr = _openFromFile(rawFile);
-
-    LibRawImageMetaData metaData = _createMetaData(ptr);
-
     return LibRawImage(
       filepath: rawFile.absolute.path,
-      metaData: metaData,
+      libRawData: LibRawData(ptr.ref),
       ptr: ptr,
     );
   }
@@ -100,13 +76,44 @@ class LibRawLoader {
   LibRawImage openImageFromBytes(Uint8List bytes) {
     final ptr = _openFromBytes(bytes);
 
-    LibRawImageMetaData metaData = _createMetaData(ptr);
-
     return LibRawImage(
       filepath: 'In-Memory Data',
-      metaData: metaData,
+      libRawData: LibRawData(ptr.ref),
       ptr: ptr,
     );
+  }
+
+  void unpackImage(LibRawImage libRawImage) {
+    if (libRawImage.ptr == null) {
+      throw Exception(
+        'LibRawImage pointer is null. Ensure the image is opened correctly.',
+      );
+    }
+
+    final result = bindings.libraw_unpack(libRawImage.ptr!);
+    if (result != 0) {
+      bindings.libraw_close(libRawImage.ptr!);
+      throw Exception('Failed to unpack image');
+    }
+
+    final processResult = bindings.libraw_dcraw_process(libRawImage.ptr!);
+
+    final errPtr = calloc<Int>();
+    if (processResult != 0) throw Exception('Processing failed');
+    final imgPtr = bindings.libraw_dcraw_make_mem_image(
+      libRawImage.ptr!,
+      errPtr,
+    );
+
+    if (errPtr.value != 0 || imgPtr == nullptr) {
+      final code = errPtr.value;
+      final msg = code != 0 ? strError(bindings, code) : 'null image pointer';
+      throw Exception('libraw_dcraw_make_mem_image failed: ($code) $msg');
+    }
+
+    libRawImage.imageData = Uint8List.fromList(readProcessedImageBytes(imgPtr));
+
+    bindings.libraw_dcraw_clear_mem(imgPtr);
   }
 
   void unpackThumbnail(LibRawImage libRawImage) {

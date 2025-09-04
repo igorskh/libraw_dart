@@ -1,19 +1,15 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:libraw_dart/libraw_image_meta_data.dart';
-
-import 'package:libraw_dart/libraw_bindings_gen.dart';
+import 'libraw_bindings_gen.dart';
+import 'libraw_data_type.dart';
 
 class LibRawImage {
-  LibRawImage({
-    required this.filepath,
-    required this.metaData,
-    this.ptr,
-  });
+  LibRawImage({required this.filepath, required this.libRawData, this.ptr});
 
   String filepath;
-  LibRawImageMetaData metaData;
+  LibRawData libRawData;
   Pointer<libraw_data_t>? ptr;
   Uint8List? thumbnailData;
+  Uint8List? imageData;
 }

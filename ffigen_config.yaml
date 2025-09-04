@@ -22,3 +22,7 @@ type-map:
       'lib': 'ffi' # predefined import.
       'c-type': 'Uint8'
       'dart-type': 'int'
+    'unsigned char':
+      'lib': 'ffi'
+      'c-type': 'Uint8'
+      'dart-type': 'int'
