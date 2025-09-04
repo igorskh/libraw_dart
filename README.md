@@ -2,9 +2,14 @@
 
 ## Versions
 
-Version of LibRaw used: 0.21.4
+Version of [LibRaw](https://github.com/LibRaw/LibRaw/tree/0.21.4) used: 0.21.4
 
-## Example
+## Generate bindings
+```bash
+dart run ffigen --config .\ffigen_config.yaml
+```
+
+## CLI Example
 
 ```bash
 dart pub get

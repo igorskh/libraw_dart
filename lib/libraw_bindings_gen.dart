@@ -125,7 +125,7 @@ class LibRawDartBindings {
 
   int libraw_open_bayer(
     ffi.Pointer<libraw_data_t> lr,
-    ffi.Pointer<ffi.UnsignedChar> data,
+    ffi.Pointer<ffi.Uint8> data,
     int datalen,
     int _raw_width,
     int _raw_height,
@@ -161,7 +161,7 @@ class LibRawDartBindings {
       ffi.NativeFunction<
           ffi.Int Function(
               ffi.Pointer<libraw_data_t>,
-              ffi.Pointer<ffi.UnsignedChar>,
+              ffi.Pointer<ffi.Uint8>,
               ffi.UnsignedInt,
               ushort,
               ushort,
@@ -169,14 +169,14 @@ class LibRawDartBindings {
               ushort,
               ushort,
               ushort,
-              ffi.UnsignedChar,
-              ffi.UnsignedChar,
+              ffi.Uint8,
+              ffi.Uint8,
               ffi.UnsignedInt,
               ffi.UnsignedInt,
               ffi.UnsignedInt)>>('libraw_open_bayer');
   late final _libraw_open_bayer = _libraw_open_bayerPtr.asFunction<
-      int Function(ffi.Pointer<libraw_data_t>, ffi.Pointer<ffi.UnsignedChar>,
-          int, int, int, int, int, int, int, int, int, int, int, int)>();
+      int Function(ffi.Pointer<libraw_data_t>, ffi.Pointer<ffi.Uint8>, int, int,
+          int, int, int, int, int, int, int, int, int, int)>();
 
   int libraw_unpack(
     ffi.Pointer<libraw_data_t> arg0,
@@ -1144,7 +1144,7 @@ final class libraw_iparams_t extends ffi.Struct {
   external ffi.Pointer<ffi.Uint8> xmpdata;
 }
 
-typedef uchar = ffi.UnsignedChar;
+typedef uchar = ffi.Uint8;
 typedef Dartuchar = int;
 
 final class libraw_nikonlens_t extends ffi.Struct {
@@ -3286,5 +3286,5 @@ final class libraw_processed_image_t extends ffi.Struct {
   external int data_size;
 
   @ffi.Array.multi([1])
-  external ffi.Array<ffi.UnsignedChar> data;
+  external ffi.Array<ffi.Uint8> data;
 }
