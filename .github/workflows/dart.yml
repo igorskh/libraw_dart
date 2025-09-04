@@ -18,26 +18,39 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
-      - name: Install build dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake pkg-config
+          sudo apt update
+          sudo apt install -y build-essential cmake git wget
 
-      - name: Build LibRaw from source
+      - name: Clone LibRaw and LibRaw-Cmake
         run: |
-          cd libraw
-          mkdir -p build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
-          make -j$(nproc)
+          git clone https://github.com/LibRaw/LibRaw.git
+
+      - name: Checkout LibRaw version
+        working-directory: ./LibRaw
+        run: |
+          git checkout 0.21.4
+
+      - name: Clone LibRaw-cmake
+        run: |
+          git clone https://github.com/LibRaw/LibRaw-cmake.git
+
+      - name: Create build folder in LibRaw-cmake
+        working-directory: ./LibRaw-cmake
+        run: |
+          mkdir build
+
+      - name: Build LibRaw shared library
+        working-directory: ./LibRaw-cmake/build
+        run: |
+          cmake -DBUILD_SHARED_LIBS=ON -DENABLE_OPENMP=OFF -DLIBRAW_PATH=${{ github.workspace }}/LibRaw ..
+          make
 
       - name: Copy shared library to app folder
         run: |
-          mkdir -p bin
-          cp libraw/build/libraw.so bin/
+          cp LibRaw-cmake/build/libraw.so.23.0.0 bin/libraw.so
 
       # Note: This workflow uses the latest stable version of the Dart SDK.
       # You can specify other versions if desired, see documentation here:
