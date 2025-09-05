@@ -11,19 +11,62 @@ The submodule is linked to the tested version of LibRaw:
 git submodule update --init --recursive
 ```
 
+Generate bindings:
 ```bash
-dart run ffigen --config .\ffigen_config.yaml
+dart run ffigen --config ./ffigen_config.yaml
+```
+
+## Usage
+
+This library is not bundled with libraw binaries. Corresponding binaries are required to run an application, `libraw.dylib` for macOS/iOS/iPadOS, `libraw.dll` for Windows, `libraw.so` for desktop Linux or Android.
+
+Create loader. determineLibraryName returns library name for the runtime:
+```dart
+final libname = determineLibraryName();
+final libPath = 'bin/$libname';
+
+LibRawLoader loader = LibRawLoader.fromPath(libPath);
+```
+
+Load image, it does not unpack thumbnail or image yet:
+```dart
+final image = loader.openImageFromPath("test_assets/DSC03748.ARW");
+```
+
+Alternatively use `openImageFromBytes`:
+```dart
+final bytes = File("test_assets/DSC03748.ARW").readAsBytesSync();
+final image = loader.openImageFromBytes(bytes);
+```
+
+Loads thumbnail in place. The `thumbnailData` property contains bytes for thumbnail image that can be directly written to a file:
+```dart
+loader.unpackThumbnail(libRawImage);
+
+print(libRawImage.thumbnailData!);
+```
+
+
+Load image RGB data in place. The `imageData` property contains bytes of RGB data and need to be processed to be saved to a file:
+```dart
+loader.unpackImage(image);
+
+print(image.imageData!.length);
+```
+
+Close image to free resources, unpacked data persists in the `image` instance:
+```dart
+loader.closeImage(image);
 ```
 
 ## CLI Example
-
-A compiled binary required to run the example script, e.g. libraw.dll for Windows, libraw.so for Linux.
 
 Following script downloads a DLL: 
 ```bash
 .\download-libraw.ps1
 ```
 
+Run CLI exmample:
 ```bash
 dart pub get
 dart run
