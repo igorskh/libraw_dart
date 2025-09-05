@@ -10,19 +10,27 @@ import 'package:libraw_dart/utils.dart';
 
 import 'libraw_data_type.dart';
 
-
 class LibRawLoader {
+  /// A loader class for handling RAW image files using the LibRaw library.
+  /// Provides methods to open, unpack, and close RAW images.
+  /// Requires an instance of [LibRawDartBindings] for FFI calls.
+
+  /// The FFI bindings for LibRaw functions.
   final LibRawDartBindings bindings;
 
+  /// Creates a [LibRawLoader] instance from the given [bindings].
   static LibRawLoader fromBindings(LibRawDartBindings bindings) =>
       LibRawLoader(bindings);
 
+  /// Creates a [LibRawLoader] instance by loading the library from the specified [path].
   static LibRawLoader fromPath(String path) =>
       LibRawLoader.fromDynamicLibrary(DynamicLibrary.open(path));
 
+  /// Creates a [LibRawLoader] instance by auto-detecting the library based on the current platform.
   static LibRawLoader fromDynamicLibrary(DynamicLibrary dylib) =>
       LibRawLoader(LibRawDartBindings(dylib));
 
+  /// Creates a [LibRawLoader] instance by auto-detecting the library based on the current platform.
   static LibRawLoader fromAutoDetect() {
     return LibRawLoader.fromDynamicLibrary(
       DynamicLibrary.open(determineLibraryName()),
@@ -32,6 +40,10 @@ class LibRawLoader {
   LibRawLoader(this.bindings);
 
   Pointer<libraw_data_t> _openFromBytes(Uint8List bytes) {
+    /// Opens a RAW image from the given [bytes].
+    /// Returns a pointer to the [libraw_data_t] structure.
+    /// Throws an [Exception] if the operation fails.
+
     Pointer<libraw_data_t> ptr = bindings.libraw_init(0);
     int result = bindings.libraw_open_buffer(
       ptr,
@@ -46,6 +58,10 @@ class LibRawLoader {
   }
 
   Pointer<libraw_data_t> _openFromFile(File rawFile) {
+    /// Opens a RAW image from the specified [rawFile].
+    /// Returns a pointer to the [libraw_data_t] structure.
+    /// Throws an [Exception] if the file does not exist or fails to open.
+
     Pointer<libraw_data_t> ptr = bindings.libraw_init(0);
     int result = bindings.libraw_open_file(
       ptr,
@@ -59,6 +75,10 @@ class LibRawLoader {
   }
 
   LibRawImage openImageFromPath(String filepath) {
+    /// Opens a RAW image from the specified [filepath].
+    /// Returns a [LibRawImage] containing image metadata and a pointer to the LibRaw data structure.
+    /// Throws an [Exception] if the file does not exist or fails to open.
+
     final rawFile = File(filepath);
 
     if (!rawFile.existsSync()) {
@@ -74,6 +94,10 @@ class LibRawLoader {
   }
 
   LibRawImage openImageFromBytes(Uint8List bytes) {
+    /// Opens a RAW image from the given [bytes].
+    /// Returns a [LibRawImage] containing image metadata and a pointer to the LibRaw data structure.
+    /// Throws an [Exception] if the operation fails.
+
     final ptr = _openFromBytes(bytes);
 
     return LibRawImage(
@@ -84,6 +108,10 @@ class LibRawLoader {
   }
 
   void unpackImage(LibRawImage libRawImage) {
+    /// Unpacks the RAW image data for the given [libRawImage].
+    /// Populates the [imageData] field of the [LibRawImage] with the processed image bytes.
+    /// Throws an [Exception] if unpacking or processing fails.
+
     if (libRawImage.ptr == null) {
       throw Exception(
         'LibRawImage pointer is null. Ensure the image is opened correctly.',
@@ -117,6 +145,10 @@ class LibRawLoader {
   }
 
   void unpackThumbnail(LibRawImage libRawImage) {
+    /// Unpacks the thumbnail image data for the given [libRawImage].
+    /// Populates the [thumbnailData] field of the [LibRawImage] with the thumbnail bytes.
+    /// Throws an [Exception] if unpacking fails or no thumbnail data is found.
+
     if (libRawImage.ptr == null) {
       throw Exception(
         'LibRawImage pointer is null. Ensure the image is opened correctly.',
@@ -142,6 +174,8 @@ class LibRawLoader {
   }
 
   void closeImage(LibRawImage libRawImage) {
+    /// Closes the given [libRawImage] and frees associated resources.
+
     if (libRawImage.ptr != null) {
       bindings.libraw_close(libRawImage.ptr!);
     }

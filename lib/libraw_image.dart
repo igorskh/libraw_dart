@@ -5,6 +5,9 @@ import 'libraw_bindings_gen.dart';
 import 'libraw_data_type.dart';
 
 class LibRawImage {
+  /// A class representing a RAW image loaded using LibRaw.
+  /// Contains metadata and image data.
+
   LibRawImage({required this.filepath, required this.libRawData, this.ptr});
 
   String filepath;

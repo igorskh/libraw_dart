@@ -9,6 +9,11 @@ import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 
 Future<double> comparePixels(String file1Path, String file2Path) async {
+  /// Compares two images pixel by pixel and returns a similarity score between 0.0 and 1.0.
+  /// A score of 1.0 indicates identical images, while 0.0 indicates completely different images.
+  /// Throws an [ArgumentError] if the images have different dimensions.
+  /// Uses the `image` package for image decoding and processing.
+  
   final img1 = img.decodeImage(await File(file1Path).readAsBytes());
   final img2 = img.decodeImage(await File(file2Path).readAsBytes());
 
@@ -35,11 +40,14 @@ Future<double> comparePixels(String file1Path, String file2Path) async {
   return 1.0 - (differentPixels / totalPixels);
 }
 
-Future<void> saveImagetToJPG(
+Future<void> saveImageToJPG(
   img.Image image,
   String filePath, {
   int quality = 5,
 }) async {
+  /// Saves the given [image] as a JPEG file at the specified [filePath].
+  /// The [quality] parameter controls the JPEG quality (1-100).
+
   await File(filePath).exists().then((exists) {
     if (exists) {
       File(filePath).deleteSync();
@@ -58,6 +66,10 @@ Future<void> saveRgbPixelsToJPG(
   String filePath, {
   int quality = 5,
 }) async {
+  /// Saves the given RGB pixel data as a JPEG file at the specified [filePath].
+  /// The [rgbPixels] should be a flat list of RGB values (3 bytes per pixel).
+  /// The [width] and [height] specify the dimensions of the image.
+
   if (rgbPixels.length != width * height * 3) {
     throw ArgumentError('RGB buffer size does not match width*height*3');
   }
@@ -71,7 +83,7 @@ Future<void> saveRgbPixelsToJPG(
     format: img.Format.uint8,
   );
 
-  await saveImagetToJPG(image, filePath, quality: quality);
+  await saveImageToJPG(image, filePath, quality: quality);
 }
 
 Future<void> saveThumbnailToJPG(
@@ -79,18 +91,15 @@ Future<void> saveThumbnailToJPG(
   String filePath, {
   int quality = 5,
 }) async {
-  await File(filePath).exists().then((exists) {
-    if (exists) {
-      File(filePath).deleteSync();
-    }
-  });
+  /// Saves the given JPEG byte data as a JPEG file at the specified [filePath].
+  /// The [jpgBytes] should contain valid JPEG data.
 
   final image = img.decodeJpg(jpgBytes);
   if (image == null) {
     throw Exception('Failed to decode thumbnail JPEG data');
   }
 
-  await saveImagetToJPG(image, filePath, quality: quality);
+  await saveImageToJPG(image, filePath, quality: quality);
 }
 
 void main() {

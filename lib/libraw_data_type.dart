@@ -3,6 +3,10 @@ import 'utils.dart';
 import 'libraw_bindings_gen.dart';
 
 class LibRawIData {
+  /// A class representing the image metadata for a RAW image.
+  /// Represents the [libraw_iparams_t] structure.
+  /// Contains information such as camera make, model, and other properties.
+
   final String make;
   final String model;
   final String normalizedMake;
@@ -30,6 +34,10 @@ class LibRawIData {
 }
 
 class LibRawImageSizes {
+  /// A class representing the size and dimensions of a RAW image.
+  /// Represents the [libraw_image_sizes_t] structure.
+  /// Contains information such as width, height, margins, and pixel aspect ratio.
+
   final int width;
   final int height;
   final int topMargin;
@@ -57,6 +65,10 @@ class LibRawImageSizes {
 }
 
 class LibRawImageOther {
+  /// A class representing additional metadata for a RAW image.
+  /// Represents the [libraw_imgother_t] structure.
+  /// Contains information such as ISO speed, aperture, shutter speed, and description.
+
   final double isoSpeed;
   final int timestamp;
   final double aperture;
@@ -78,6 +90,10 @@ class LibRawImageOther {
 }
 
 class LibRawLensInfo {
+  /// A class representing lens information for a RAW image.
+  /// Represents the [libraw_lensinfo_t] structure.
+  /// Contains information such as lens make, focal lengths, and aperture values.
+
   final String lens;
   final String lensMake;
   final double minFocal;
@@ -99,6 +115,10 @@ class LibRawLensInfo {
 }
 
 class LibRawData {
+  /// A class representing the main LibRaw data structure.
+  /// Represents the [libraw_data_t] structure.
+  ///  Contains nested structures for image metadata, sizes, other properties, and lens information.
+
   final LibRawIData idata;
   final LibRawImageSizes sizes;
   final LibRawImageOther other;
